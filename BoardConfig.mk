@@ -9,10 +9,12 @@ DEVICE_PATH := device/motorola/hiphi
 
 # For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
+BUILD_BROKEN_DUP_RULES := true
+TARGET_SUPPORTS_64_BIT_APPS := true
 
 # A/B
 AB_OTA_UPDATER := true
-BOARD_BUILD_SYSTEM_ROOT_IMAGE := false
+
 AB_OTA_PARTITIONS += \
     boot \
     dtbo \
@@ -41,10 +43,14 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a75
 
-# Bootloader
-TARGET_NO_BOOTLOADER := false
+ENABLE_CPUSETS := true
+ENABLE_SCHEDBOOST := true
+TARGET_NO_BOOTLOADER := true
 TARGET_USES_UEFI := true
 TARGET_USES_REMOTEPROC := true
+
+# Assert
+TARGET_OTA_ASSERT_DEVICE := hiphi
 
 # Display
 TARGET_SCREEN_DENSITY := 400
@@ -111,21 +117,33 @@ BOARD_AVB_VBMETA_SYSTEM_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
 BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
 
-# Hack: prevent anti rollback
-PLATFORM_SECURITY_PATCH := 2099-12-31
-VENDOR_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
-BOOT_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
-PLATFORM_VERSION := 99.87.36
-PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
-
 # Crypto
 TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_CRYPTO_FBE := true
+#TW_INCLUDE_CRYPTO_FBE := true
 TW_INCLUDE_FBE_METADATA_DECRYPT := true
 BOARD_USES_QCOM_FBE_DECRYPTION := true
 TW_USE_FSCRYPT_POLICY := 2
+# QTI vibrator
+TW_SUPPORT_INPUT_AIDL_HAPTICS := true
+RECOVERY_SDCARD_ON_DATA := true
+TW_FORCE_USE_BUSYBOX := true
+TW_FRAMERATE := 60
+TARGET_USES_MKE2FS := true
+TW_PREPARE_DATA_MEDIA_EARLY := true
+TW_INCLUDE_RESETPROP := true
+# VINTF
+PRODUCT_ENFORCE_VINTF_MANIFEST := true
+
+TARGET_RECOVERY_DEVICE_MODULES += fastbootd
+TW_INPUT_BLACKLIST := "hbtp_vm" # Blocks virtual touch engines from overriding the real panel
 
 # TWRP Configuration
+FOX_VERSION := 14.1
+FOX_BUILD_DEVICE := hiphi
+#TW_EXCLUDE_DEFAULT_USB_INIT := true
+# Stops TWRP from endlessly polling the battery/power supply nodes during boot
+#TW_EXCLUDE_ENCRYPTED_BACKUPS := true 
+
 TW_THEME := portrait_hdpi
 TW_EXTRA_LANGUAGES := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
@@ -147,3 +165,11 @@ TW_SUPPORT_INPUT_AIDL_HAPTICS_FIX_OFF := true
 # Debug flags
 TWRP_INCLUDE_LOGCAT := true
 TARGET_USES_LOGD := true
+TW_DISABLE_SPLASH := true
+
+
+# Disable strict modern C prototype checks for legacy recovery modules
+TARGET_ERROR_FLAGS := -Wno-error=deprecated-non-prototype
+BOARD_CLANG_CFLAGS += -Wno-error=deprecated-non-prototype
+BOARD_CLANG_CFLAGS_arm += -Wno-error=deprecated-non-prototype
+
