@@ -9,6 +9,4 @@ PRODUCT_MAKEFILES := \
     $(LOCAL_DIR)/twrp_hiphi.mk
 
 COMMON_LUNCH_CHOICES := \
-    twrp_hiphi-user \
-    twrp_hiphi-userdebug \
     twrp_hiphi-eng
