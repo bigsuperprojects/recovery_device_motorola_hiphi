@@ -1,0 +1,5 @@
+# mount point   fstype  device                                  options
+/boot           emmc    /dev/block/bootdevice/by-name/boot      flags=slotselect
+/metadata       ext4    /dev/block/bootdevice/by-name/metadata  wait,check,formattable
+/data           f2fs    /dev/block/bootdevice/by-name/userdata  wait,check,fileencryption=aes-256-xts:aes-256-cts:v2,keydirectory=/metadata/vold/metadata_encryption,wrappedkey
+
