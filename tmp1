@@ -1,0 +1,103 @@
+diff --git a/AndroidProducts.mk b/AndroidProducts.mk
+index 606c4e1..c0c8603 100644
+--- a/AndroidProducts.mk
++++ b/AndroidProducts.mk
+@@ -6,9 +6,7 @@
+ #
+ 
+ PRODUCT_MAKEFILES := \
+-    $(LOCAL_DIR)/twrp_hiphi.mk
++    $(LOCAL_DIR)/pb_hiphi.mk
+ 
+ COMMON_LUNCH_CHOICES := \
+-    twrp_hiphi-user \
+-    twrp_hiphi-userdebug \
+-    twrp_hiphi-eng
++    pb_hiphi-eng
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 1532c96..c3ad6de 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -9,6 +9,12 @@ DEVICE_PATH := device/motorola/hiphi
+ 
+ # For building with minimal manifest
+ ALLOW_MISSING_DEPENDENCIES := true
++BUILD_BROKEN_DUP_RULES := true
++TARGET_USES_64_BIT_BINDER := true
++
++# Force 64-bit filesystem offsets via Clang
++TARGET_CONLYFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
++TARGET_CPPFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+ 
+ # A/B
+ AB_OTA_UPDATER := true
+@@ -64,6 +70,7 @@ BOARD_KERNEL_PAGESIZE := 4096
+ BOARD_RAMDISK_USE_LZ4 := true
+ BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
+ BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
++BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+ 
+ # Partitions
+ BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
+@@ -143,6 +150,16 @@ TW_HAS_EDL_MODE := true
+ TW_EXCLUDE_DEFAULT_USB_INIT := true
+ TW_SUPPORT_INPUT_AIDL_HAPTICS := true
+ TW_SUPPORT_INPUT_AIDL_HAPTICS_FIX_OFF := true
++TW_CUSTOM_BATTERY_PATH := "/sys/class/power_supply/mmi_battery"
++#TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone0/temp"
++# Use the running health HAL service for power statistics
++BOARD_HAS_NO_REAL_SDCARD := true
++TW_USE_HEALTH_HAL := true
++# Blacklist the crashing Qualcomm virtualization touch layers
++TW_INPUT_BLACKLIST := "hbtp_vm"
++# Force the UI thread to look for direct Linux event nodes
++TARGET_RECOVERY_UI_BLANK_AFTER_BLANKING := true
++
+ 
+ # Debug flags
+ TWRP_INCLUDE_LOGCAT := true
+diff --git a/device.mk b/device.mk
+index 4720b2e..6f1859e 100644
+--- a/device.mk
++++ b/device.mk
+@@ -28,6 +28,10 @@ AB_OTA_POSTINSTALL_CONFIG += \
+     FILESYSTEM_TYPE_vendor=ext4 \
+     POSTINSTALL_OPTIONAL_vendor=true
+ 
++# Pack the cold boot touch configuration binaries into the recovery root filesystem
++PRODUCT_COPY_FILES += \
++    device/motorola/hiphi/recovery/root/vendor/firmware/tianma_goodix_cfg_group.bin:recovery/root/vendor/firmware/tianma_goodix_cfg_group.bin
++
+ # Boot control HAL
+ PRODUCT_PACKAGES += \
+     android.hardware.boot@1.2-impl-qti \
+diff --git a/twrp_hiphi.mk b/pb_hiphi.mk
+similarity index 97%
+rename from twrp_hiphi.mk
+rename to pb_hiphi.mk
+index 48dc239..e5dcf55 100644
+--- a/twrp_hiphi.mk
++++ b/pb_hiphi.mk
+@@ -20,7 +20,7 @@ $(call inherit-product, vendor/twrp/config/common.mk)
+ $(call inherit-product, device/motorola/hiphi/device.mk)
+ 
+ PRODUCT_DEVICE := hiphi
+-PRODUCT_NAME := twrp_hiphi
++PRODUCT_NAME := pb_hiphi
+ PRODUCT_BRAND := motorola
+ PRODUCT_MODEL := motorola edge 30 pro
+ PRODUCT_MANUFACTURER := motorola
+diff --git a/recovery/root/init.recovery.qcom.rc b/recovery/root/init.recovery.qcom.rc
+index cbaf97d..0e99ad3 100644
+--- a/recovery/root/init.recovery.qcom.rc
++++ b/recovery/root/init.recovery.qcom.rc
+@@ -57,7 +57,8 @@ on property:init.svc.fastbootd=running
+     insmod /vendor/lib/modules/spf_core_dlkm.ko
+     insmod /vendor/lib/modules/adsp_loader_dlkm.ko
+     setprop twrp.modules.loaded true
+-
++    start vendor.mot.touch-hal-1-1
++    
+ on post-fs && property:init.svc.fastbootd=stopped
+     # Trigger loading kernel modules in normal mode
+     setprop twrp.modules.loaded true
