@@ -28,6 +28,10 @@ AB_OTA_POSTINSTALL_CONFIG += \
     FILESYSTEM_TYPE_vendor=ext4 \
     POSTINSTALL_OPTIONAL_vendor=true
 
+# Pack the cold boot touch configuration binaries into the recovery root filesystem
+PRODUCT_COPY_FILES += \
+    device/motorola/hiphi/recovery/root/vendor/firmware/tianma_goodix_cfg_group.bin:recovery/root/vendor/firmware/tianma_goodix_cfg_group.bin
+
 # Boot control HAL
 PRODUCT_PACKAGES += \
     android.hardware.boot@1.2-impl-qti \

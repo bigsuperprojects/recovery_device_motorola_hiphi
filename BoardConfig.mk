@@ -9,6 +9,12 @@ DEVICE_PATH := device/motorola/hiphi
 
 # For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
+BUILD_BROKEN_DUP_RULES := true
+TARGET_USES_64_BIT_BINDER := true
+
+# Force 64-bit filesystem offsets via Clang
+TARGET_CONLYFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+TARGET_CPPFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 
 # A/B
 AB_OTA_UPDATER := true
@@ -64,6 +70,7 @@ BOARD_KERNEL_PAGESIZE := 4096
 BOARD_RAMDISK_USE_LZ4 := true
 BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
 
 # Partitions
 BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
@@ -143,6 +150,16 @@ TW_HAS_EDL_MODE := true
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 TW_SUPPORT_INPUT_AIDL_HAPTICS := true
 TW_SUPPORT_INPUT_AIDL_HAPTICS_FIX_OFF := true
+TW_CUSTOM_BATTERY_PATH := "/sys/class/power_supply/mmi_battery"
+#TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone0/temp"
+# Use the running health HAL service for power statistics
+BOARD_HAS_NO_REAL_SDCARD := true
+TW_USE_HEALTH_HAL := true
+# Blacklist the crashing Qualcomm virtualization touch layers
+TW_INPUT_BLACKLIST := "hbtp_vm"
+# Force the UI thread to look for direct Linux event nodes
+TARGET_RECOVERY_UI_BLANK_AFTER_BLANKING := true
+
 
 # Debug flags
 TWRP_INCLUDE_LOGCAT := true
