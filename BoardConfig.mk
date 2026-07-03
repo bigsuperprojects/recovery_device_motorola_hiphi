@@ -9,6 +9,8 @@ DEVICE_PATH := device/motorola/hiphi
 
 # For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
+BUILD_BROKEN_DUP_RULES := true
+TARGET_SUPPORTS_64_BIT_APPS := true
 
 # A/B
 AB_OTA_UPDATER := true

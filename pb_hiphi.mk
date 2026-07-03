@@ -7,23 +7,27 @@
 
 # Inherit from those products. Most specific first.
 $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_minimal.mk)
+$(call inherit-product, device/motorola/hiphi/device.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/runtime_libart.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 
-# Inherit some common TWRP stuff.
-$(call inherit-product, vendor/twrp/config/common.mk)
+# Inherit PBRP stuff.
+$(call inherit-product, vendor/pb/config/common.mk)
 
 # Inherit from hiphi device
 $(call inherit-product, device/motorola/hiphi/device.mk)
 
-PRODUCT_DEVICE := hiphi
-PRODUCT_NAME := twrp_hiphi
+BOARD_VENDOR := motorola
 PRODUCT_BRAND := motorola
-PRODUCT_MODEL := motorola edge 30 pro
+PRODUCT_DEVICE := hiphi
+PRODUCT_NAME := pb_hiphi
 PRODUCT_MANUFACTURER := motorola
+PRODUCT_MODEL := motorola edge 30 pro
+TARGET_VENDOR := motorola
 
 PRODUCT_GMS_CLIENTID_BASE := android-motorola
 
