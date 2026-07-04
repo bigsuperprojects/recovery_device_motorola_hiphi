@@ -131,7 +131,7 @@ TW_THEME := portrait_hdpi
 TW_Y_OFFSET := 85
 TW_H_OFFSET := -85
 TW_EXTRA_LANGUAGES := true
-TW_INPUT_BLACKLIST := "hbtp_vm"
+TW_INPUT_BLACKLIST := "hbtp_vm sensor_hub mmi_key"
 TW_INCLUDE_REPACKTOOLS := true
 TW_INCLUDE_RESETPROP := true
 TW_INCLUDE_LIBRESETPROP := true
@@ -152,3 +152,9 @@ TW_SUPPORT_INPUT_AIDL_HAPTICS_FIX_OFF := true
 # Debug flags
 TWRP_INCLUDE_LOGCAT := true
 TARGET_USES_LOGD := true
+
+# Aggressively forces the recovery framework to cycle screen power states
+# at the earliest point of kernel boot, helping trigger the panel notifiers
+TARGET_RECOVERY_BLANK_ON_BOOT := true
+TW_SCREEN_BLANK_ON_BOOT := true
+
