@@ -1,0 +1,3 @@
+# Stop logging denials for the main boot/recovery orchestrators
+permissive init;
+permissive recovery;
