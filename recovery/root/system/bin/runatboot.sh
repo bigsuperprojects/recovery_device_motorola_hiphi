@@ -21,7 +21,8 @@ fi
 base_dir="/vendor_dlkm"
 
 # 1. Attempt to mount /vendor_dlkm
-MOUNT_ERR=$(mount /vendor_dlkm 2>&1)
+MOUNT_ERR=$(mount /dev/block/bootdevice/by-name/vendor_dlkm /vendor_dlkm 2>&1)
+
 MOUNT_RC=$?
 
 if [ $MOUNT_RC -eq 0 ]; then
@@ -31,7 +32,7 @@ else
     MOUNT_ERR=$(echo "$MOUNT_ERR" | tr '\n' ' ')
     log_kmsg "mount /vendor_dlkm FAILURE (Code: $MOUNT_RC) - Reason: $MOUNT_ERR - falling back to ramdisk"
     # Switch the base directory to the recovery ramdisk path
-    base_dir="/vendor"
+    base_dir=""
 fi
 
 # 2. Define the batch of modules in their strict loading order
@@ -67,7 +68,7 @@ for mod in $MODULES; do
     INSMOD_RC=$?
     
     # Check the result of the insmod command
-    if [ $INSMOD_RC -eq 0 ]; then
+    if [ $INSMOD_RC -eq 0 ] || [ -d /vendor_dlkm/lib/modules ]; then
         log_kmsg "insmod $mod SUCCESS ($base_dir)"
     else
         # Strip trailing newlines to prevent multi-line breaks in dmesg
@@ -85,7 +86,7 @@ done
 
 # Block and wait for the battery status node to populate with active text
 BAT_STATUS="/sys/class/power_supply/mmi_battery/status"
-while true; do
+while false; do
     if [ -f "$BAT_STATUS" ]; then
         VAL=$(cat "$BAT_STATUS" | tr -d ' \n\r')
         # Release only when it has text content and isn't "Unknown" or empty
