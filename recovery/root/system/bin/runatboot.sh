@@ -5,9 +5,11 @@ log_kmsg() {
     echo "<6>mod_test: $1" > /dev/kmsg
 }
 
+echo "1" > /proc/sys/kernel/firmware_config/force_sysfs_fallback
+
 mkdir -p /firmware
 SLOT=$(getprop ro.boot.slot_suffix)
-MOUNT_ERR=$(mount /dev/block/bootdevice/by-name/modem$SLOT /firmware -O ro 2>&1)
+MOUNT_ERR=$(mount -t ext4 /dev/block/bootdevice/by-name/modem$SLOT /firmware -O ro 2>&1)
 MOUNT_RC=$?
 if [ $MOUNT_RC -eq 0 ]; then
     log_kmsg "mount firmware SUCCESS"
@@ -21,7 +23,7 @@ fi
 base_dir="/vendor_dlkm"
 
 # 1. Attempt to mount /vendor_dlkm
-MOUNT_ERR=$(mount /dev/block/bootdevice/by-name/vendor_dlkm /vendor_dlkm 2>&1)
+MOUNT_ERR=$(busybox mount -t ext4 -o ro /dev/block/bootdevice/by-name/vendor_dlkm /vendor_dlkm 2>&1)
 
 MOUNT_RC=$?
 
@@ -37,6 +39,7 @@ fi
 
 # 2. Define the batch of modules in their strict loading order
 MODULES="
+msm_mmrm.ko
 msm_drm.ko
 mmi_annotate.ko
 mmi_info.ko
@@ -77,25 +80,7 @@ for mod in $MODULES; do
     fi
 done
 
-echo "1" > /proc/sys/kernel/firmware_config/force_sysfs_fallback
 echo "1" > /sys/kernel/boot_adsp/boot
-
-while [ ! -e /dev/input/event0 ]; do
-    sleep 0.2
-done
-
-# Block and wait for the battery status node to populate with active text
-BAT_STATUS="/sys/class/power_supply/mmi_battery/status"
-while false; do
-    if [ -f "$BAT_STATUS" ]; then
-        VAL=$(cat "$BAT_STATUS" | tr -d ' \n\r')
-        # Release only when it has text content and isn't "Unknown" or empty
-        if [ ! -z "$VAL" ] && [ "$VAL" != "Unknown" ]; then
-            break
-        fi
-    fi
-    sleep 0.2
-done
 
 # Everything is ready. Safe-trigger the PBRP environment to start.
 setprop vendor.hardware.ready 1
