@@ -23,7 +23,7 @@ fi
 base_dir="/vendor_dlkm"
 
 # 1. Attempt to mount /vendor_dlkm
-MOUNT_ERR=$(busybox mount -t ext4 -o ro /dev/block/bootdevice/by-name/vendor_dlkm /vendor_dlkm 2>&1)
+MOUNT_ERR=$(busybox mount -t ext4 -o ro /dev/block/mapper/vendor_dlkm$SLOT /vendor_dlkm 2>&1)
 
 MOUNT_RC=$?
 
